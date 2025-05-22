@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - Khiem
 
 jobs:
   build-and-deploy:
