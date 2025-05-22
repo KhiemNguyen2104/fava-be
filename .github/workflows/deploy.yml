@@ -1,0 +1,48 @@
+name: Deploy with PM2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "22"
+
+      - name: Add environment variables
+        env:
+          DATABASE_URL: ${{ secrets.DB_URL }}
+          JWT_SECRET: ${{ secrets.ACCESS_SECRET }}
+        run: 
+          echo "DATABASE_URL=${{ secrets.DB_URL }}" >> .env
+          echo "ACCESS_SECRET=${{ secrets.ACCESS_SECRET }}" >> .env
+          echo "REFRESH_SECRET=${{ secrets.REFRESH_SECRET }}" >> .env
+          cat .env
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Setup Prisma
+        run: npx prisma generate
+
+      - name: Build project
+        run: NODE_OPTIONS="--max-old-space-size=4096" npm run build
+
+      - name: Install PM2
+        run: npm install -g pm2
+
+      - name: Restart with PM2
+        run: |
+          if pm2 describe TestGithubActions > /dev/null; then
+          pm2 delete TestGithubActions
+          fi  
+          pm2 start dist/main.js --name "TestGithubActions" # Adjust the entry point to your project's start file
+          pm2 save # Save the PM2 process list
