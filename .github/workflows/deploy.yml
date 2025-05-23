@@ -56,6 +56,8 @@ jobs:
           WEATHERAPI_KEY: ${{ secrets.WEATHERAPI_KEY }}
           PORT: ${{ secrets.PORT }}
         run: |
+          echo "API KEY: ${RENDER_API_KEY}"
+          
           response=$(curl --request PUT \
           --url https://api.render.com/v1/env-groups/evg-d0of5vqdbo4c73ern210/env-vars/DB_URL \
           --header 'accept: application/json' \
@@ -73,6 +75,7 @@ jobs:
           --header 'content-type: application/json' \
           --data '{"value":"${ACCESS_SECRET}"}')
 
+          echo ${RENDER_API_KEY}
           echo "HTTP Response Code: $response"
           cat response.json
 
