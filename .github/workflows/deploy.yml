@@ -66,7 +66,6 @@ jobs:
           --data '{"value":"${DB_URL}"}')
 
           echo "HTTP Response Code: $response"
-          cat response.json
 
           response=$(curl --request PUT \
           --url https://api.render.com/v1/env-groups/evg-d0of5vqdbo4c73ern210/env-vars/ACCESS_SECRET \
@@ -75,9 +74,7 @@ jobs:
           --header 'content-type: application/json' \
           --data '{"value":"${ACCESS_SECRET}"}')
 
-          echo ${RENDER_API_KEY}
           echo "HTTP Response Code: $response"
-          cat response.json
 
           response=$(curl --request PUT \
           --url https://api.render.com/v1/env-groups/evg-d0of5vqdbo4c73ern210/env-vars/REFRESH_SECRET \
@@ -87,7 +84,6 @@ jobs:
           --data '{"value":"${REFRESH_SECRET}"}')
 
           echo "HTTP Response Code: $response"
-          cat response.json
 
           response=$(curl --request PUT \
           --url https://api.render.com/v1/env-groups/evg-d0of5vqdbo4c73ern210/env-vars/WEATHERAPI_KEY \
@@ -97,7 +93,6 @@ jobs:
           --data '{"value":"${WEATHERAPI_KEY}"}')
 
           echo "HTTP Response Code: $response"
-          cat response.json
 
           response=$(curl --request PUT \
           --url https://api.render.com/v1/env-groups/evg-d0of5vqdbo4c73ern210/env-vars/PORT \
@@ -107,7 +102,6 @@ jobs:
           --data '{"value":"${PORT}"}')
 
           echo "HTTP Response Code: $response"
-          cat response.json
 
       - name: Trigger Render Deployment
         if: github.ref == 'refs/heads/main' && success()
