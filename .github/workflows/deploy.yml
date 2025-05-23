@@ -47,24 +47,28 @@ jobs:
           pm2 start dist/main.js --name "fava-be" # Adjust the entry point to your project's start file
           pm2 save # Save the PM2 process list
 
-      - name: Update Render environment
+      - name: Update Render environment variables
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          SERVICE_ID: srv-d0d3c3buibrs73dse8f0
+          DB_URL: ${{ secrets.DB_URL }}
+          ACCESS_SECRET: ${{ secrets.ACCESS_SECRET }}
+          REFRESH_SECRET: ${{ secrets.REFRESH_SECRET }}
+          WEATHERAPI_KEY: ${{ secrets.WEATHERAPI_KEY }}
+          PORT: ${{ secrets.PORT }}
         run: |
-          SERVICE_ID=${{ secrets.SERVICE_ID }}
-
           curl -X PATCH "https://api.render.com/v1/services/$SERVICE_ID/env-vars" \
-          -H "Authorization: Bearer $RENDER_API_KEY" \
-          -H "Content-Type: application/json" \
-          -d '{
-            "envVars": [
-              { "key": "DB_URL", "value": "'"${{ secrets.DB_URL }}"'", "serviceId": "'"$SERVICE_ID"'" },
-              { "key": "ACCESS_SECRET", "value": "'"${{ secrets.ACCESS_SECRET }}"'", "serviceId": "'"$SERVICE_ID"'" },
-              { "key": "REFRESH_SECRET", "value": "'"${{ secrets.REFRESH_SECRET }}"'", "serviceId": "'"$SERVICE_ID"'" },
-              { "key": "WEATHERAPI_KEY", "value": "'"${{ secrets.WEATHERAPI_KEY }}"'", "serviceId": "'"$SERVICE_ID"'" },
-              { "key": "PORT", "value": "'"${{ secrets.PORT }}"'", "serviceId": "'"$SERVICE_ID"'" }
-            ]
-          }'
+            -H "Authorization: Bearer $RENDER_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"envVars\": [
+                { \"key\": \"DB_URL\", \"value\": \"$DB_URL\", \"serviceId\": \"$SERVICE_ID\" },
+                { \"key\": \"ACCESS_SECRET\", \"value\": \"$ACCESS_SECRET\", \"serviceId\": \"$SERVICE_ID\" },
+                { \"key\": \"REFRESH_SECRET\", \"value\": \"$REFRESH_SECRET\", \"serviceId\": \"$SERVICE_ID\" },
+                { \"key\": \"WEATHERAPI_KEY\", \"value\": \"$WEATHERAPI_KEY\", \"serviceId\": \"$SERVICE_ID\" },
+                { \"key\": \"PORT\", \"value\": \"$PORT\", \"serviceId\": \"$SERVICE_ID\" }
+              ]
+            }"
 
       - name: Trigger Render Deployment
         if: github.ref == 'refs/heads/main' && success()
