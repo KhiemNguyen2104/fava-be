@@ -49,7 +49,7 @@ jobs:
 
       - name: Update Render environment variables
         env:
-          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_API_KEY: rnd_N1PUgoL5jtdxAhupqET04kN0MZIG
           DB_URL: ${{ secrets.DB_URL }}
           ACCESS_SECRET: ${{ secrets.ACCESS_SECRET }}
           REFRESH_SECRET: ${{ secrets.REFRESH_SECRET }}
