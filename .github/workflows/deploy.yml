@@ -58,13 +58,20 @@ jobs:
           PORT: ${{ secrets.PORT }}
         run: |
           response=$(curl -s -w "%{http_code}" -o response.json -X PUT "https://api.render.com/v1/services/$SERVICE_ID/env-vars" \
-          -H "Authorization: Bearer $RENDER_API_KEY" \
-          -H "Content-Type: application/json" \
-          -d "{
-            \"envVars\": [
-              { \"key\": \"DB_URL\", \"value\": \"$DB_URL\", \"serviceId\": \"$SERVICE_ID\" }
+            -H "Authorization: Bearer $RENDER_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d @- <<EOF
+          {
+            "envVars": [
+              { "key": "DB_URL", "value": "$DB_URL" },
+              { "key": "ACCESS_SECRET", "value": "$ACCESS_SECRET" },
+              { "key": "REFRESH_SECRET", "value": "$REFRESH_SECRET" },
+              { "key": "WEATHERAPI_KEY", "value": "$WEATHERAPI_KEY" },
+              { "key": "PORT", "value": "$PORT" }
             ]
-          }")
+          }
+          EOF
+          )
 
           echo "HTTP Response Code: $response"
           cat response.json
