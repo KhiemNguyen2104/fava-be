@@ -57,7 +57,7 @@ jobs:
           WEATHERAPI_KEY: ${{ secrets.WEATHERAPI_KEY }}
           PORT: ${{ secrets.PORT }}
         run: |
-          response=$(curl -s -w "%{http_code}" -o response.json -X PATCH "https://api.render.com/v1/services/$SERVICE_ID/env-vars" \
+          response=$(curl -s -w "%{http_code}" -o response.json -X PUT "https://api.render.com/v1/services/$SERVICE_ID/env-vars" \
           -H "Authorization: Bearer $RENDER_API_KEY" \
           -H "Content-Type: application/json" \
           -d "{
