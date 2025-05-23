@@ -50,7 +50,6 @@ jobs:
       - name: Update Render environment variables
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
-          SERVICE_ID: ${{ secrets.SERVICE_ID }}
           DB_URL: ${{ secrets.DB_URL }}
           ACCESS_SECRET: ${{ secrets.ACCESS_SECRET }}
           REFRESH_SECRET: ${{ secrets.REFRESH_SECRET }}
@@ -58,7 +57,7 @@ jobs:
           PORT: ${{ secrets.PORT }}
         run: |
           response=$(curl --request PUT \
-          --url https://api.render.com/v1/env-groups/fava/env-vars/DB_URL \
+          --url https://api.render.com/v1/env-groups/evg-d0of5vqdbo4c73ern210/env-vars/DB_URL \
           --header 'accept: application/json' \
           --header 'authorization: Bearer ${RENDER_API_KEY}' \
           --header 'content-type: application/json' \
@@ -68,7 +67,7 @@ jobs:
           cat response.json
 
           response=$(curl --request PUT \
-          --url https://api.render.com/v1/env-groups/fava/env-vars/ACCESS_SECRET \
+          --url https://api.render.com/v1/env-groups/evg-d0of5vqdbo4c73ern210/env-vars/ACCESS_SECRET \
           --header 'accept: application/json' \
           --header 'authorization: Bearer ${RENDER_API_KEY}' \
           --header 'content-type: application/json' \
@@ -78,7 +77,7 @@ jobs:
           cat response.json
 
           response=$(curl --request PUT \
-          --url https://api.render.com/v1/env-groups/fava/env-vars/REFRESH_SECRET \
+          --url https://api.render.com/v1/env-groups/evg-d0of5vqdbo4c73ern210/env-vars/REFRESH_SECRET \
           --header 'accept: application/json' \
           --header 'authorization: Bearer ${RENDER_API_KEY}' \
           --header 'content-type: application/json' \
@@ -88,7 +87,7 @@ jobs:
           cat response.json
 
           response=$(curl --request PUT \
-          --url https://api.render.com/v1/env-groups/fava/env-vars/WEATHERAPI_KEY \
+          --url https://api.render.com/v1/env-groups/evg-d0of5vqdbo4c73ern210/env-vars/WEATHERAPI_KEY \
           --header 'accept: application/json' \
           --header 'authorization: Bearer ${RENDER_API_KEY}' \
           --header 'content-type: application/json' \
@@ -98,7 +97,7 @@ jobs:
           cat response.json
 
           response=$(curl --request PUT \
-          --url https://api.render.com/v1/env-groups/fava/env-vars/PORT \
+          --url https://api.render.com/v1/env-groups/evg-d0of5vqdbo4c73ern210/env-vars/PORT \
           --header 'accept: application/json' \
           --header 'authorization: Bearer ${RENDER_API_KEY}' \
           --header 'content-type: application/json' \
