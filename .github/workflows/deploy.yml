@@ -50,32 +50,54 @@ jobs:
       - name: Update Render environment variables
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
-          SERVICE_ID: srv-d0d3c3buibrs73dse8f0
+          SERVICE_ID: ${{ secrets.SERVICE_ID }}
           DB_URL: ${{ secrets.DB_URL }}
           ACCESS_SECRET: ${{ secrets.ACCESS_SECRET }}
           REFRESH_SECRET: ${{ secrets.REFRESH_SECRET }}
           WEATHERAPI_KEY: ${{ secrets.WEATHERAPI_KEY }}
           PORT: ${{ secrets.PORT }}
         run: |
-          cat <<EOF > payload.json
-          {
-            "envVars": [
-              { "key": "DB_URL", "value": "${DB_URL}" },
-              { "key": "ACCESS_SECRET", "value": "${ACCESS_SECRET}" },
-              { "key": "REFRESH_SECRET", "value": "${REFRESH_SECRET}" },
-              { "key": "WEATHERAPI_KEY", "value": "${WEATHERAPI_KEY}" },
-              { "key": "PORT", "value": "${PORT}" }
-            ]
-          }
-          EOF
+          response=$(curl --request PUT \
+          --url https://api.render.com/v1/env-groups/fava/env-vars/DB_URL \
+          --header 'accept: application/json' \
+          --header 'content-type: application/json' \
+          --data '{"value":"${DB_URL}"}')
 
-          echo "Payload: "
-          cat payload.json
+          echo "HTTP Response Code: $response"
+          cat response.json
 
-          response=$(curl -s -w "%{http_code}" -o response.json -X PUT "https://api.render.com/v1/services/${SERVICE_ID}/env-vars" \
-            -H "Authorization: Bearer ${RENDER_API_KEY}" \
-            -H "Content-Type: application/json" \
-            -d @payload.json)
+          response=$(curl --request PUT \
+          --url https://api.render.com/v1/env-groups/fava/env-vars/ACCESS_SECRET \
+          --header 'accept: application/json' \
+          --header 'content-type: application/json' \
+          --data '{"value":"${ACCESS_SECRET}"}')
+
+          echo "HTTP Response Code: $response"
+          cat response.json
+
+          response=$(curl --request PUT \
+          --url https://api.render.com/v1/env-groups/fava/env-vars/REFRESH_SECRET \
+          --header 'accept: application/json' \
+          --header 'content-type: application/json' \
+          --data '{"value":"${REFRESH_SECRET}"}')
+
+          echo "HTTP Response Code: $response"
+          cat response.json
+
+          response=$(curl --request PUT \
+          --url https://api.render.com/v1/env-groups/fava/env-vars/WEATHERAPI_KEY \
+          --header 'accept: application/json' \
+          --header 'content-type: application/json' \
+          --data '{"value":"${WEATHERAPI_KEY}"}')
+
+          echo "HTTP Response Code: $response"
+          cat response.json
+
+          response=$(curl --request PUT \
+          --url https://api.render.com/v1/env-groups/fava/env-vars/PORT \
+          --header 'accept: application/json' \
+          --header 'content-type: application/json' \
+          --data '{"value":"${PORT}"}')
 
           echo "HTTP Response Code: $response"
           cat response.json
