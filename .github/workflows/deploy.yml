@@ -47,6 +47,25 @@ jobs:
           pm2 start dist/main.js --name "fava-be" # Adjust the entry point to your project's start file
           pm2 save # Save the PM2 process list
 
+      - name: Update Render environment
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+        run: |
+          SERVICE_ID=${{ secrets.SERVICE_ID }}
+
+          curl -X PATCH "https://api.render.com/v1/services/$SERVICE_ID/env-vars" \
+          -H "Authorization: Bearer $RENDER_API_KEY" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "envVars": [
+              { "key": "DB_URL", "value": "'"${{ secrets.DB_URL }}"'", "serviceId": "'"$SERVICE_ID"'" },
+              { "key": "ACCESS_SECRET", "value": "'"${{ secrets.ACCESS_SECRET }}"'", "serviceId": "'"$SERVICE_ID"'" },
+              { "key": "REFRESH_SECRET", "value": "'"${{ secrets.REFRESH_SECRET }}"'", "serviceId": "'"$SERVICE_ID"'" },
+              { "key": "WEATHERAPI_KEY", "value": "'"${{ secrets.WEATHERAPI_KEY }}"'", "serviceId": "'"$SERVICE_ID"'" },
+              { "key": "PORT", "value": "'"${{ secrets.PORT }}"'", "serviceId": "'"$SERVICE_ID"'" }
+            ]
+          }'
+
       - name: Trigger Render Deployment
         if: github.ref == 'refs/heads/main' && success()
         run: curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
