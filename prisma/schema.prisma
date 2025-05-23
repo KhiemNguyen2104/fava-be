@@ -10,5 +10,58 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("DB_URL")
+}
+
+enum Size {
+  S
+  M
+  L
+  X
+  XL
+  XXL
+}
+
+enum ClothesKind {
+  Coat
+  TShirt
+  Skirt
+  Shirt
+  Pants
+  Hat
+}
+
+enum Purpose {
+  Work
+  GoOut
+  Party
+}
+
+model User {
+  userEmail String @id
+  userName  String
+
+  hashKey          String
+  clothes          Clothes[]
+  suggestions      Int       @default(0)
+  useFulSuggestion Int       @default(0)
+
+  currentLocations String?
+}
+
+model Clothes {
+  id        String      @id
+  name      String
+  kind      ClothesKind
+  tempFloor Float
+  tempRoof  Float
+  label     String?
+  size      Size?
+
+  userEmail String
+  user      User   @relation(references: [userEmail], fields: [userEmail])
+}
+
+model WeatherLocations {
+  cityName String @id
 }

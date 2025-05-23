@@ -19,13 +19,12 @@ jobs:
           node-version: "22"
 
       - name: Add environment variables
-        env:
-          DATABASE_URL: ${{ secrets.DB_URL }}
-          JWT_SECRET: ${{ secrets.ACCESS_SECRET }}
         run: 
           echo "DATABASE_URL=${{ secrets.DB_URL }}" >> .env
           echo "ACCESS_SECRET=${{ secrets.ACCESS_SECRET }}" >> .env
           echo "REFRESH_SECRET=${{ secrets.REFRESH_SECRET }}" >> .env
+          echo "WEATHERAPI_KEY=${{ secrets.WEATHERAPI_KEY }}" >> .env
+          echo "PORT=${{ secrets.PORT }}" >> .env
           cat .env
 
       - name: Install dependencies
@@ -42,8 +41,12 @@ jobs:
 
       - name: Restart with PM2
         run: |
-          if pm2 describe TestGithubActions > /dev/null; then
-          pm2 delete TestGithubActions
+          if pm2 describe fava-be > /dev/null; then
+          pm2 delete fava-be
           fi  
-          pm2 start dist/main.js --name "TestGithubActions" # Adjust the entry point to your project's start file
+          pm2 start dist/main.js --name "fava-be" # Adjust the entry point to your project's start file
           pm2 save # Save the PM2 process list
+
+      - name: Trigger Render Deployment
+        if: github.ref == 'refs/heads/main' && success()
+        run: curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
