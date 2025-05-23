@@ -60,6 +60,7 @@ jobs:
           response=$(curl --request PUT \
           --url https://api.render.com/v1/env-groups/fava/env-vars/DB_URL \
           --header 'accept: application/json' \
+          --header 'authorization: Bearer ${RENDER_API_KEY}' \
           --header 'content-type: application/json' \
           --data '{"value":"${DB_URL}"}')
 
@@ -69,6 +70,7 @@ jobs:
           response=$(curl --request PUT \
           --url https://api.render.com/v1/env-groups/fava/env-vars/ACCESS_SECRET \
           --header 'accept: application/json' \
+          --header 'authorization: Bearer ${RENDER_API_KEY}' \
           --header 'content-type: application/json' \
           --data '{"value":"${ACCESS_SECRET}"}')
 
@@ -78,6 +80,7 @@ jobs:
           response=$(curl --request PUT \
           --url https://api.render.com/v1/env-groups/fava/env-vars/REFRESH_SECRET \
           --header 'accept: application/json' \
+          --header 'authorization: Bearer ${RENDER_API_KEY}' \
           --header 'content-type: application/json' \
           --data '{"value":"${REFRESH_SECRET}"}')
 
@@ -87,6 +90,7 @@ jobs:
           response=$(curl --request PUT \
           --url https://api.render.com/v1/env-groups/fava/env-vars/WEATHERAPI_KEY \
           --header 'accept: application/json' \
+          --header 'authorization: Bearer ${RENDER_API_KEY}' \
           --header 'content-type: application/json' \
           --data '{"value":"${WEATHERAPI_KEY}"}')
 
@@ -96,6 +100,7 @@ jobs:
           response=$(curl --request PUT \
           --url https://api.render.com/v1/env-groups/fava/env-vars/PORT \
           --header 'accept: application/json' \
+          --header 'authorization: Bearer ${RENDER_API_KEY}' \
           --header 'content-type: application/json' \
           --data '{"value":"${PORT}"}')
 
