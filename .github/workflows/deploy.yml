@@ -69,7 +69,7 @@ jobs:
           }
           EOF
 
-          echo @payload.json
+          cat @payload.json
 
           response=$(curl -s -w "%{http_code}" -o response.json -X PUT "https://api.render.com/v1/services/${SERVICE_ID}/env-vars" \
             -H "Authorization: Bearer ${RENDER_API_KEY}" \
