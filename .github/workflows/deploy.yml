@@ -56,50 +56,48 @@ jobs:
           WEATHERAPI_KEY: ${{ secrets.WEATHERAPI_KEY }}
           PORT: ${{ secrets.PORT }}
         run: |
-          echo "API KEY: ${RENDER_API_KEY}"
-          
           response=$(curl --request PUT \
           --url https://api.render.com/v1/env-groups/evg-d0of5vqdbo4c73ern210/env-vars/DB_URL \
           --header 'accept: application/json' \
-          --header 'authorization: Bearer rnd_N1PUgoL5jtdxAhupqET04kN0MZIG' \
+          --header "authorization: Bearer ${RENDER_API_KEY}" \
           --header 'content-type: application/json' \
-          --data '{"value":"${DB_URL}"}')
+          --data "{\"value\":\"${DB_URL}\"}")
 
           echo "HTTP Response Code: $response"
 
           response=$(curl --request PUT \
           --url https://api.render.com/v1/env-groups/evg-d0of5vqdbo4c73ern210/env-vars/ACCESS_SECRET \
           --header 'accept: application/json' \
-          --header 'authorization: Bearer ${RENDER_API_KEY}' \
+          --header "authorization: Bearer ${RENDER_API_KEY}" \
           --header 'content-type: application/json' \
-          --data '{"value":"${ACCESS_SECRET}"}')
+          --data "{\"value\":\"${ACCESS_SECRET}\"}")
 
           echo "HTTP Response Code: $response"
 
           response=$(curl --request PUT \
           --url https://api.render.com/v1/env-groups/evg-d0of5vqdbo4c73ern210/env-vars/REFRESH_SECRET \
           --header 'accept: application/json' \
-          --header 'authorization: Bearer ${RENDER_API_KEY}' \
+          --header "authorization: Bearer ${RENDER_API_KEY}" \
           --header 'content-type: application/json' \
-          --data '{"value":"${REFRESH_SECRET}"}')
+          --data "{\"value\":\"${REFRESH_SECRET}\"}")
 
           echo "HTTP Response Code: $response"
 
           response=$(curl --request PUT \
           --url https://api.render.com/v1/env-groups/evg-d0of5vqdbo4c73ern210/env-vars/WEATHERAPI_KEY \
           --header 'accept: application/json' \
-          --header 'authorization: Bearer ${RENDER_API_KEY}' \
+          --header "authorization: Bearer ${RENDER_API_KEY}" \
           --header 'content-type: application/json' \
-          --data '{"value":"${WEATHERAPI_KEY}"}')
+          --data "{\"value\":\"${WEATHERAPI_KEY}\"}")
 
           echo "HTTP Response Code: $response"
 
           response=$(curl --request PUT \
           --url https://api.render.com/v1/env-groups/evg-d0of5vqdbo4c73ern210/env-vars/PORT \
           --header 'accept: application/json' \
-          --header 'authorization: Bearer ${RENDER_API_KEY}' \
+          --header "authorization: Bearer ${RENDER_API_KEY}" \
           --header 'content-type: application/json' \
-          --data '{"value":"${PORT}"}')
+          --data "{\"value\":\"${PORT}\"}")
 
           echo "HTTP Response Code: $response"
 
