@@ -61,7 +61,7 @@ jobs:
           response=$(curl --request PUT \
           --url https://api.render.com/v1/env-groups/evg-d0of5vqdbo4c73ern210/env-vars/DB_URL \
           --header 'accept: application/json' \
-          --header 'authorization: Bearer ${RENDER_API_KEY}' \
+          --header 'authorization: Bearer rnd_N1PUgoL5jtdxAhupqET04kN0MZIG' \
           --header 'content-type: application/json' \
           --data '{"value":"${DB_URL}"}')
 
