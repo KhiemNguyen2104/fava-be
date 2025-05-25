@@ -9,6 +9,6 @@ import { WeatherModule } from './weather/weather.module';
 @Module({
   imports: [AuthModule, PrismaModule, WeatherModule],
   controllers: [AppController],
-  providers: [AppService, PrismaService],
+  providers: [AppService, PrismaService, ],
 })
 export class AppModule {}

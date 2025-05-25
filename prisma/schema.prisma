@@ -45,6 +45,7 @@ model User {
   clothes          Clothes[]
   suggestions      Int       @default(0)
   useFulSuggestion Int       @default(0)
+  refreshToken String?
 
   currentLocations String?
 }
