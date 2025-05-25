@@ -48,6 +48,7 @@ jobs:
           pm2 save # Save the PM2 process list
 
       - name: Update Render environment variables
+        if: github.ref == 'refs/heads/main' && success()
         env:
           RENDER_API_KEY: rnd_N1PUgoL5jtdxAhupqET04kN0MZIG
           DB_URL: ${{ secrets.DB_URL }}
