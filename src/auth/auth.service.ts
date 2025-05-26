@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { LoginDto, SignupDto } from './dto/auth.dto';
@@ -16,7 +16,7 @@ export class AuthService {
             }
         })
 
-        if (!user) { throw new ForbiddenException(Errors.USER_NOT_FOUND); }
+        if (!user) { throw new NotFoundException(Errors.USER_NOT_FOUND); }
 
         const matched = await argon.verify(user.hashKey, dto.password);
 
@@ -83,7 +83,7 @@ export class AuthService {
             }
         })
 
-        if (!user) { throw new ForbiddenException(Errors.USER_NOT_FOUND) }
+        if (!user) { throw new NotFoundException(Errors.USER_NOT_FOUND) }
 
         const userName = user.userName;
 

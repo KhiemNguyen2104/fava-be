@@ -5,4 +5,6 @@ export const Errors =  {
     ACCESS_TOKEN_SIGNING_ERROR: "Error in access token signing.",
     REFRESH_TOKEN_SIGNING_ERROR: "Error in refresh token signing.",
     CITY_NOT_FOUND: "City not found.",
+    AVATAR_NOT_FOUND: "Avatar not found.",
+    BACKGROUND_NOT_FOUND: "Background not found."
 }

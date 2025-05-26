@@ -8,7 +8,7 @@ import { Errors } from 'src/common';
 export class WeatherService {
     private WEATHERAPI_KEY = process.env.WEATHERAPI_KEY
     private WEATHER_BASE_URL = `http://api.weatherapi.com/v1/forecast.json?key=${this.WEATHERAPI_KEY}`
-    constructor(private prisma: PrismaService) {}
+    constructor(private prisma: PrismaService) { }
 
     async addLocation(location: string) {
         const loc = await this.prisma.weatherLocations.findUnique({
@@ -63,7 +63,7 @@ export class WeatherService {
         const l = await this.getLocation(name)
 
         if (!l) throw new ForbiddenException(Errors.CITY_NOT_FOUND)
-        
+
         const hour = new Date(time).getHours()
         const url = this.WEATHER_BASE_URL + `&q=${name}&hour=${hour}`
 
