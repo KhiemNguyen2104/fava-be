@@ -29,7 +29,7 @@ export class UserController {
     @ApiOperation({ summary: "API for getting the current user's avatar" })
     async getCurrentUserAvatar(@GetUser() data: JwtPayLoad, @Res() res) {
         const fileName = data.sub.split('@')[0]
-        const avatarPath = join(process.cwd(), 'static', 'backgrounds', `${fileName}.png`);
+        const avatarPath = join(process.cwd(), 'static', 'avatars', `${fileName}.png`);
 
         if (!existsSync(avatarPath)) { throw new NotFoundException(Errors.AVATAR_NOT_FOUND) }
 
@@ -42,12 +42,8 @@ export class UserController {
     @Get('background')
     @ApiOperation({ summary: "API for getting the current user's background" })
     async getCurrentUserBackground(@GetUser() data: JwtPayLoad, @Res() res) {
-        console.log("Data: ", data)
-
         const fileName = data.sub.split('@')[0]
         const backgroundPath = join(process.cwd(), 'static', 'backgrounds', `${fileName}.png`);
-
-        console.log("Path: ", backgroundPath)
 
         if (!existsSync(backgroundPath)) { throw new NotFoundException(Errors.BACKGROUND_NOT_FOUND) }
 
@@ -97,7 +93,7 @@ export class UserController {
     ) {
         return {
             message: 'Upload successful',
-            filename: `${user.sub}.png`,
+            filename: `${user.sub.split('@')[0]}.png`,
         };
     }
 

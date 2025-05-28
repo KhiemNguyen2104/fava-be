@@ -6,9 +6,12 @@ import { PrismaModule } from './prisma/prisma.module';
 import { PrismaService } from './prisma/prisma.service';
 import { WeatherModule } from './weather/weather.module';
 import { UserModule } from './user/user.module';
+import { ClothesModule } from './clothes/clothes.module';
+import { VisionModule } from './vision/vision.module';
+import { AmadeusModule } from './amadeus/amadeus.module';
 
 @Module({
-  imports: [AuthModule, PrismaModule, WeatherModule, UserModule],
+  imports: [AuthModule, PrismaModule, WeatherModule, UserModule, ClothesModule, VisionModule, AmadeusModule],
   controllers: [AppController],
   providers: [AppService, PrismaService, ],
 })

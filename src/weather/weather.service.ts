@@ -1,66 +1,119 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import axios from 'axios';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ForecastDto } from './dto';
 import { Errors } from 'src/common';
+import { AmadeusService } from 'src/amadeus/amadeus.service';
 
 @Injectable()
 export class WeatherService {
     private WEATHERAPI_KEY = process.env.WEATHERAPI_KEY
     private WEATHER_BASE_URL = `http://api.weatherapi.com/v1/forecast.json?key=${this.WEATHERAPI_KEY}`
-    constructor(private prisma: PrismaService) { }
+    constructor(private prisma: PrismaService, private amadeusService: AmadeusService) { }
 
-    async addLocation(location: string) {
+    async addLocation(location: string, userEmail: string) {
+        const cityName = await this.amadeusService.searchCity(location)
+
+        console.log("Data: ", cityName);
+
         const loc = await this.prisma.weatherLocations.findUnique({
             where: {
-                cityName: location
+                cityName: cityName
             }
         })
 
-        if (loc) return location;
-
-        await this.prisma.weatherLocations.create({
-            data: {
-                cityName: location
-            }
-        })
-
-        return location
-    }
-
-    async removeLocation(location: string) {
-        const loc = await this.prisma.weatherLocations.findUnique({
+        const rel = await this.prisma.hasLocation.findUnique({
             where: {
-                cityName: location
+                userEmail_cityName: {
+                    userEmail: userEmail,
+                    cityName: cityName
+                }
             }
         })
 
-        if (!loc) throw new ForbiddenException(Errors.CITY_NOT_FOUND)
+        if (loc && rel) return cityName
 
-        await this.prisma.weatherLocations.delete({
-            where: {
-                cityName: location
-            }
-        })
-
-        return location
-    }
-
-    async getLocation(name: string | undefined) {
-        if (name) {
-            return await this.prisma.weatherLocations.findUnique({
-                where: {
-                    cityName: name
+        if (!loc) {
+            await this.prisma.weatherLocations.create({
+                data: {
+                    cityName: cityName
                 }
             })
+        }
+
+        if (!rel) {
+            await this.prisma.hasLocation.create({
+                data: {
+                    userEmail: userEmail,
+                    cityName: cityName
+                }
+            })
+        }
+
+        return cityName
+    }
+
+    async removeLocation(location: string, userEmail: string) {
+        const loc = await this.prisma.weatherLocations.findUnique({
+            where: {
+                cityName: location
+            }
+        })
+
+        const rel = await this.prisma.hasLocation.findUnique({
+            where: {
+                userEmail_cityName: {
+                    userEmail: userEmail,
+                    cityName: location
+                }
+            }
+        })
+
+        if (!loc) throw new NotFoundException(Errors.CITY_NOT_FOUND)
+        if (!rel) throw new NotFoundException(Errors.HAS_LOCATION_NOT_FOUND)
+
+        await this.prisma.hasLocation.delete({
+            where: {
+                userEmail_cityName: {
+                    userEmail: userEmail,
+                    cityName: location
+                }
+            }
+        })
+
+        return location
+    }
+
+    async getLocation(userEmail: string, name: string | undefined) {
+        if (name) {
+            const city = await this.prisma.hasLocation.findUnique({
+                where: {
+                    userEmail_cityName: {
+                        userEmail: userEmail,
+                        cityName: name
+                    }
+                }
+            })
+
+            if (!city) { throw new NotFoundException(Errors.CITY_NOT_FOUND) }
+
+            return city
         } else {
-            return await this.prisma.weatherLocations.findMany()
+            const rel = await this.prisma.hasLocation.findMany({
+                where: {
+                    userEmail: userEmail
+                }
+            })
+
+            if (rel.length == 0) { throw new NotFoundException(Errors.CITY_NOT_FOUND) }
+
+            return rel.map((r) => r.cityName)
         }
     }
 
-    async getClimateData(name: string, time: Date): Promise<ForecastDto> {
+    async getClimateData(name: string, time: Date, userEmail: string): Promise<ForecastDto> {
         // const name = location.toLowerCase().replaceAll(' ', '')
-        const l = await this.getLocation(name)
+        const l = await this.getLocation(name, userEmail)
 
         if (!l) throw new ForbiddenException(Errors.CITY_NOT_FOUND)
 
