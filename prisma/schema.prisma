@@ -29,6 +29,7 @@ enum ClothesKind {
   Shirt
   Pants
   Hat
+  Jacket
 }
 
 enum Purpose {
@@ -45,9 +46,10 @@ model User {
   clothes          Clothes[]
   suggestions      Int       @default(0)
   useFulSuggestion Int       @default(0)
-  refreshToken String?
+  refreshToken     String?
 
   currentLocation String?
+  hasLocations HasLocation[]
 }
 
 model Clothes {
@@ -59,10 +61,24 @@ model Clothes {
   label     String?
   size      Size?
 
+  quant Int
+
   userEmail String
   user      User   @relation(references: [userEmail], fields: [userEmail])
 }
 
+model HasLocation {
+  userEmail String
+  user User @relation(references: [userEmail], fields: [userEmail])
+
+  cityName String
+  weatherLocation WeatherLocations @relation(references: [cityName], fields: [cityName])
+
+  @@id([userEmail, cityName])
+}
+
 model WeatherLocations {
   cityName String @id
+
+  hasLocations HasLocation[]
 }
