@@ -123,17 +123,15 @@ export class WeatherService {
         return user.currentLocation
     }
 
-    async getClimateData(name: string, time: Date, userEmail: string): Promise<ForecastDto> {
+    async getClimateData(name: string, userEmail: string): Promise<ForecastDto> {
         // const name = location.toLowerCase().replaceAll(' ', '')
         const l = await this.getLocation(userEmail, name)
 
         if (!l) throw new ForbiddenException(Errors.CITY_NOT_FOUND)
 
-        const hour = new Date(time).getHours()
         const url = this.WEATHER_BASE_URL + `&q=${name}`
 
         console.log(`Location: ${name}`)
-        console.log(`Hour: ${hour}`)
 
         const response = await axios.get(url)
 
