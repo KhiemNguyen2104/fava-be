@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { AddClothesDto, DeleteClothesDto } from './dto/clothes.dto';
+import { AddClothesDto, DeleteClothesDto, GetClothesDto } from './dto/clothes.dto';
 import * as argon from 'argon2';
 import { Inferring } from './inferring';
+import { Errors } from 'src/common';
 
 @Injectable()
 export class ClothesService {
@@ -131,5 +132,40 @@ export class ClothesService {
         }
 
         return null;
+    }
+
+    async getClothes(dto: GetClothesDto, userEmail: string) {
+        const tempFloor = dto.tempFloor ? dto.tempFloor : this.inferring.tempInterring(dto.kind).tempFloor;
+        const tempRoof = dto.tempRoof ? dto.tempRoof : this.inferring.tempInterring(dto.kind).tempRoof;
+
+        const key = dto.name
+            + "_"
+            + String(dto.kind)
+            + "_"
+            + (dto.label ? dto.label : "")
+            + "_"
+            + (dto.size ? String(dto.size) : "")
+            + "_"
+            + tempFloor
+            + "_"
+            + tempRoof
+
+        console.log("Key: ", key)
+
+        const clothes = await this.prisma.clothes.findMany({
+            where: {
+                name: dto.name,
+                kind: dto.kind,
+                tempFloor: tempFloor,
+                tempRoof: tempRoof,
+                ...(dto.label && { label: dto.label }),
+                ...(dto.size && { size: dto.size }),
+                userEmail: userEmail
+            }
+        })
+
+        if (clothes.length == 0) { throw new NotFoundException(Errors.CLOTHES_NOT_FOUND) }
+
+        return clothes[0]
     }
 }

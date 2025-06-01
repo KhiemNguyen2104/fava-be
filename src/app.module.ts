@@ -9,9 +9,10 @@ import { UserModule } from './user/user.module';
 import { ClothesModule } from './clothes/clothes.module';
 import { VisionModule } from './vision/vision.module';
 import { AmadeusModule } from './amadeus/amadeus.module';
+import { AssistantModule } from './assistant/assistant.module';
 
 @Module({
-  imports: [AuthModule, PrismaModule, WeatherModule, UserModule, ClothesModule, VisionModule, AmadeusModule],
+  imports: [AuthModule, PrismaModule, WeatherModule, UserModule, ClothesModule, VisionModule, AmadeusModule, AssistantModule],
   controllers: [AppController],
   providers: [AppService, PrismaService, ],
 })

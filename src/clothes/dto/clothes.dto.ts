@@ -66,6 +66,34 @@ export class DeleteClothesDto {
     size?: Size
 }
 
-// export class GetClothesDto {
-//     @IsString()
-// }
+export class GetClothesDto {
+    @IsString()
+    @IsNotEmpty()
+    @ApiProperty({ type: String, required: true, default: "T1 Jacket" })
+    name: string
+
+    @IsEnum(ClothesKind)
+    @IsNotEmpty()
+    @ApiProperty({ required: true, default: ClothesKind.TShirt })
+    kind: ClothesKind
+
+    @IsNumber()
+    @IsOptional()
+    @ApiProperty({ required: false, default: 22, type: Number })
+    tempFloor: number
+
+    @IsNumber()
+    @IsOptional()
+    @ApiProperty({ required: false, default: 35, type: Number })
+    tempRoof: number
+
+    @IsString()
+    @IsOptional()
+    @ApiProperty({ required: false, default: "Nike", type: String })
+    label?: string
+
+    @IsEnum(Size)
+    @IsOptional()
+    @ApiProperty({ required: false, default: Size.XL })
+    size?: Size
+}

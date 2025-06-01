@@ -1,17 +1,19 @@
-import { Body, Controller, Delete, ForbiddenException, Get, Post, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, ForbiddenException, Get, NotFoundException, Post, Query, Req, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ClothesService } from './clothes.service';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiQuery } from '@nestjs/swagger';
-import { AddClothesDto, DeleteClothesDto } from './dto/clothes.dto';
+import { AddClothesDto, DeleteClothesDto, GetClothesDto } from './dto/clothes.dto';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
 import { JwtPayLoad } from 'src/common/model';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { dirname, extname, join } from 'path';
 import * as fs from 'fs';
-import { existsSync } from 'fs';
+import { existsSync, createReadStream } from 'fs';
 import { Inferring } from './inferring';
 import { Errors } from 'src/common';
+import { ClothesKind, Size } from '@prisma/client';
+import { Response } from 'express';
 
 @UseGuards(AuthGuard('jwt'))
 @ApiBearerAuth()
@@ -133,7 +135,76 @@ export class ClothesController {
         }
     }
 
-    // @Get('profile')
-    // @ApiOperation({summary: "The API for getting the clothes's profile"})
-    // @ApiBody()
+    @Get('profile')
+    @ApiOperation({ summary: "The API for getting the clothing's profile" })
+    @ApiQuery({ type: String, name: 'name', required: true, default: 'T1 Jacket' })
+    @ApiQuery({ name: 'kind', required: true, default: ClothesKind.TShirt })
+    @ApiQuery({ type: Number, name: 'tempFloor', required: true, default: 22 })
+    @ApiQuery({ type: Number, name: 'tempRoof', required: true, default: 35 })
+    @ApiQuery({ type: String, name: 'label', required: false, default: 'Nike' })
+    @ApiQuery({ name: 'size', required: false, default: Size.XL })
+    async getClothesProfile(
+        @GetUser() user: JwtPayLoad,
+        @Query('name') name: string,
+        @Query('kind') kind: ClothesKind,
+        @Query('tempFloor') tempFloor: number,
+        @Query('tempRoof') tempRoof: number,
+        @Query('label') label?: string,
+        @Query('size') size?: Size,
+    ) {
+        const dto = {
+            name: name,
+            kind: kind,
+            tempFloor: Number(tempFloor),
+            tempRoof: Number(tempRoof),
+            ...(label && { label: label }),
+            ...(size && { size: size })
+        } as GetClothesDto
+
+        return await this.clothesService.getClothes(dto, user.sub);
+    }
+
+    @Get('image')
+    @ApiOperation({ summary: "The API for getting the clothing's image" })
+    @ApiQuery({ type: String, name: 'name', required: true, default: 'T1 Jacket' })
+    @ApiQuery({ name: 'kind', required: true, default: ClothesKind.TShirt })
+    @ApiQuery({ type: Number, name: 'tempFloor', required: true, default: 22 })
+    @ApiQuery({ type: Number, name: 'tempRoof', required: true, default: 35 })
+    @ApiQuery({ type: String, name: 'label', required: false, default: 'Nike' })
+    @ApiQuery({ name: 'size', required: false, default: Size.XL })
+    async getClothesImage(
+        @Res() res: Response,
+        @GetUser() user: JwtPayLoad,
+        @Query('name') name: string,
+        @Query('kind') kind: ClothesKind,
+        @Query('tempFloor') tempFloor: number,
+        @Query('tempRoof') tempRoof: number,
+        @Query('label') label?: string,
+        @Query('size') size?: Size,
+    ) {
+        const dto = {
+            name: name,
+            kind: kind,
+            tempFloor: Number(tempFloor),
+            tempRoof: Number(tempRoof),
+            ...(label && { label: label }),
+            ...(size && { size: size })
+        } as GetClothesDto
+
+        const fileName = dto.name + "_"
+            + dto.kind + "_"
+            + (dto.label || "") + "_"
+            + (dto.size || "") + "_"
+            + dto.tempFloor + "_"
+            + dto.tempRoof + ".png"
+
+        const imagePath = join(process.cwd(), 'static', 'clothes', 'images', user.sub.split('@')[0], fileName);
+
+        if (!existsSync(imagePath)) { throw new NotFoundException(Errors.CLOTHES_IMAGE_NOT_FOUND) }
+
+        const stream = createReadStream(imagePath)
+        res.set({ 'Content-Type': 'image/png' });
+
+        return stream.pipe(res)
+    }
 }

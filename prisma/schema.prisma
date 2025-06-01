@@ -61,6 +61,7 @@ model Clothes {
   label     String?
   size      Size?
 
+  purposes Purpose[]
   quant Int
 
   userEmail String

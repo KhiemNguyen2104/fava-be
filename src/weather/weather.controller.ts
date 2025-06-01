@@ -33,6 +33,12 @@ export class WeatherController {
         return await this.weatherService.getLocation(user.sub, name);
     }
 
+    @Get()
+    @ApiOperation({ summary: 'Get the current city of the user, if it does not exist, return null' })
+    async getCurrentLocation(@GetUser() user: JwtPayLoad) {
+        return await this.weatherService.getCurrentLocation(user.sub);
+    }
+
     @Get('forecast')
     @ApiOperation({ summary: 'Take the weather forecast' })
     @ApiQuery({ name: 'location', type: String, description: 'The name of the city you want to take the data', default: 'Ho Chi Minh', required: true })

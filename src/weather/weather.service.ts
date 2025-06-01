@@ -111,6 +111,18 @@ export class WeatherService {
         }
     }
 
+    async getCurrentLocation(userEmail: string) {
+        const user = await this.prisma.user.findUnique({
+            where: {
+                userEmail: userEmail
+            }
+        })
+
+        if (!user) { throw new NotFoundException(Errors.USER_NOT_FOUND) }
+
+        return user.currentLocation
+    }
+
     async getClimateData(name: string, time: Date, userEmail: string): Promise<ForecastDto> {
         // const name = location.toLowerCase().replaceAll(' ', '')
         const l = await this.getLocation(name, userEmail)
@@ -118,7 +130,7 @@ export class WeatherService {
         if (!l) throw new ForbiddenException(Errors.CITY_NOT_FOUND)
 
         const hour = new Date(time).getHours()
-        const url = this.WEATHER_BASE_URL + `&q=${name}&hour=${hour}`
+        const url = this.WEATHER_BASE_URL + `&q=${name}`
 
         console.log(`Location: ${name}`)
         console.log(`Hour: ${hour}`)

@@ -9,5 +9,6 @@ export const Errors =  {
     AVATAR_NOT_FOUND: "Avatar not found.",
     BACKGROUND_NOT_FOUND: "Background not found.",
     CLOTHES_NOT_FOUND: "Clothes not found",
-    DELETE_CLOTHES_ERROR: "Cannot delete the clothes."
+    DELETE_CLOTHES_ERROR: "Cannot delete the clothes.",
+    CLOTHES_IMAGE_NOT_FOUND: "Clothes image not found."
 }
