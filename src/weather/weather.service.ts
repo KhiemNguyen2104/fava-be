@@ -97,7 +97,7 @@ export class WeatherService {
 
             if (!city) { throw new NotFoundException(Errors.CITY_NOT_FOUND) }
 
-            return city
+            return city.cityName
         } else {
             const rel = await this.prisma.hasLocation.findMany({
                 where: {
@@ -125,7 +125,7 @@ export class WeatherService {
 
     async getClimateData(name: string, time: Date, userEmail: string): Promise<ForecastDto> {
         // const name = location.toLowerCase().replaceAll(' ', '')
-        const l = await this.getLocation(name, userEmail)
+        const l = await this.getLocation(userEmail, name)
 
         if (!l) throw new ForbiddenException(Errors.CITY_NOT_FOUND)
 
