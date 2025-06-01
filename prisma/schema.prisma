@@ -45,7 +45,7 @@ model User {
   hashKey          String
   clothes          Clothes[]
   suggestions      Int       @default(0)
-  useFulSuggestion Int       @default(0)
+  usefulSuggestions Int       @default(0)
   refreshToken     String?
 
   currentLocation String?

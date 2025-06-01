@@ -17,9 +17,23 @@ export class UserService {
 
             if (!user) { throw new NotFoundException(Errors.USER_NOT_FOUND) }
 
-            return user
+            return {
+                userName: user.userName,
+                userEmail: user.userEmail,
+                currentLocation: user.currentLocation,
+                suggestions: user.suggestions,
+                usefulSuggestions: user.usefulSuggestions
+            }
         } else {
-            return await this.prisma.user.findMany()
+            return (await this.prisma.user.findMany()).map((user) => {
+                return {
+                    userName: user.userName,
+                    userEmail: user.userEmail,
+                    currentLocation: user.currentLocation,
+                    suggestions: user.suggestions,
+                    usefulSuggestions: user.usefulSuggestions
+                };
+            })
         }
     }
 
