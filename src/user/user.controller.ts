@@ -13,7 +13,7 @@ import * as argon from 'argon2';
 import { Errors } from 'src/common';
 
 @ApiBearerAuth()
-@ApiTags('User')
+@ApiTags('Users')
 @UseGuards(AuthGuard('jwt'))
 @Controller('users')
 export class UserController {
