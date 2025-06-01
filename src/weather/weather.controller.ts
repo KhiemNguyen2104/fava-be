@@ -42,7 +42,7 @@ export class WeatherController {
     @Get('forecast')
     @ApiOperation({ summary: 'Take the weather forecast' })
     @ApiQuery({ name: 'location', type: String, description: 'The name of the city you want to take the data', default: 'Ho Chi Minh City', required: true })
-    async getWeatherForecast(@Query('location') location: string, @Query('time') time: Date, @GetUser() user: JwtPayLoad) {
+    async getWeatherForecast(@Query('location') location: string, @GetUser() user: JwtPayLoad) {
         return await this.weatherService.getClimateData(location, user.sub);
     }
 }
