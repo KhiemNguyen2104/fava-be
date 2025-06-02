@@ -14,8 +14,6 @@ export class WeatherService {
     async addLocation(location: string, userEmail: string) {
         const cityName = await this.amadeusService.searchCity(location)
 
-        console.log("Data: ", cityName);
-
         const loc = await this.prisma.weatherLocations.findUnique({
             where: {
                 cityName: cityName

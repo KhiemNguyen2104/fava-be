@@ -12,7 +12,7 @@ import * as fs from 'fs';
 import { existsSync, createReadStream } from 'fs';
 import { Inferring } from './inferring';
 import { Errors } from 'src/common';
-import { ClothesKind, Size } from '@prisma/client';
+import { ClothesKind, Purpose, Size } from '@prisma/client';
 import { Response } from 'express';
 
 @UseGuards(AuthGuard('jwt'))
@@ -47,6 +47,7 @@ export class ClothesController {
                         kind: "TShirt",
                         tempFloor: 22,
                         tempRoof: 35,
+                        purposes: ['Work', 'GoOut'],
                         label: "Nike",
                         size: "XL"
                     }),
@@ -93,7 +94,8 @@ export class ClothesController {
                     + (prof.label || "") + "_"
                     + (prof.size || "") + "_"
                     + tempFloor + "_"
-                    + tempRoof
+                    + tempRoof + "_"
+                    + prof.purposes.join('_')
                     + extname(file.originalname);
                 const newPath = join(dirname(file.path), newFileName);
 
@@ -113,20 +115,23 @@ export class ClothesController {
         const clothes = await this.clothesService.deleteClothes(dto, user.sub)
 
         if (clothes) {
-            const fileName = clothes.name + "_"
-                + clothes.kind + "_"
-                + (clothes.label || "") + "_"
-                + (clothes.size || "") + "_"
-                + clothes.tempFloor + "_"
-                + clothes.tempRoof + ".png"
+            if (clothes.quant == 1) {
+                const fileName = clothes.name + "_"
+                    + clothes.kind + "_"
+                    + (clothes.label || "") + "_"
+                    + (clothes.size || "") + "_"
+                    + clothes.tempFloor + "_"
+                    + clothes.tempRoof + "_"
+                    + clothes.purposes.join('_') + ".png"
 
-            const pathToFile = join(process.cwd(), 'static', 'clothes', 'images', user.sub.split('@')[0], fileName);
+                const pathToFile = join(process.cwd(), 'static', 'clothes', 'images', user.sub.split('@')[0], fileName);
 
-            try {
-                await fs.promises.unlink(pathToFile);
-                console.log(`Deleted image file: ${pathToFile}`);
-            } catch (error) {
-                console.warn(`Image file not found or failed to delete: ${pathToFile}`);
+                try {
+                    await fs.promises.unlink(pathToFile);
+                    console.log(`Deleted image file: ${pathToFile}`);
+                } catch (error) {
+                    console.warn(`Image file not found or failed to delete: ${pathToFile}`);
+                }
             }
 
             return { message: 'Clothes and associated image deleted successfully' };
@@ -141,6 +146,7 @@ export class ClothesController {
     @ApiQuery({ name: 'kind', required: true, default: ClothesKind.TShirt })
     @ApiQuery({ type: Number, name: 'tempFloor', required: true, default: 22 })
     @ApiQuery({ type: Number, name: 'tempRoof', required: true, default: 35 })
+    @ApiQuery({ type: String, name: 'purposes', required: true, default: [Purpose.Work, Purpose.GoOut] })
     @ApiQuery({ type: String, name: 'label', required: false, default: 'Nike' })
     @ApiQuery({ name: 'size', required: false, default: Size.XL })
     async getClothesProfile(
@@ -149,14 +155,19 @@ export class ClothesController {
         @Query('kind') kind: ClothesKind,
         @Query('tempFloor') tempFloor: number,
         @Query('tempRoof') tempRoof: number,
+        @Query('purposes') purposes: string,
         @Query('label') label?: string,
         @Query('size') size?: Size,
     ) {
+        const ps = JSON.parse(purposes)
+        console.log("Purposes: ", ps)
+
         const dto = {
             name: name,
             kind: kind,
             tempFloor: Number(tempFloor),
             tempRoof: Number(tempRoof),
+            purposes: ps,
             ...(label && { label: label }),
             ...(size && { size: size })
         } as GetClothesDto
@@ -170,6 +181,7 @@ export class ClothesController {
     @ApiQuery({ name: 'kind', required: true, default: ClothesKind.TShirt })
     @ApiQuery({ type: Number, name: 'tempFloor', required: true, default: 22 })
     @ApiQuery({ type: Number, name: 'tempRoof', required: true, default: 35 })
+    @ApiQuery({ type: String, name: 'purposes', required: true, default: [Purpose.Work, Purpose.GoOut] })
     @ApiQuery({ type: String, name: 'label', required: false, default: 'Nike' })
     @ApiQuery({ name: 'size', required: false, default: Size.XL })
     async getClothesImage(
@@ -179,14 +191,18 @@ export class ClothesController {
         @Query('kind') kind: ClothesKind,
         @Query('tempFloor') tempFloor: number,
         @Query('tempRoof') tempRoof: number,
+        @Query('purposes') purposes: string,
         @Query('label') label?: string,
         @Query('size') size?: Size,
     ) {
+        const ps = JSON.parse(purposes)
+
         const dto = {
             name: name,
             kind: kind,
             tempFloor: Number(tempFloor),
             tempRoof: Number(tempRoof),
+            purposes: ps,
             ...(label && { label: label }),
             ...(size && { size: size })
         } as GetClothesDto
@@ -196,7 +212,10 @@ export class ClothesController {
             + (dto.label || "") + "_"
             + (dto.size || "") + "_"
             + dto.tempFloor + "_"
-            + dto.tempRoof + ".png"
+            + dto.tempRoof + "_"
+            + dto.purposes.join('_') + ".png"
+
+        console.log("File: ", fileName)
 
         const imagePath = join(process.cwd(), 'static', 'clothes', 'images', user.sub.split('@')[0], fileName);
 

@@ -4,6 +4,7 @@ import { AddClothesDto, DeleteClothesDto, GetClothesDto } from './dto/clothes.dt
 import * as argon from 'argon2';
 import { Inferring } from './inferring';
 import { Errors } from 'src/common';
+import { Purpose } from '@prisma/client';
 
 @Injectable()
 export class ClothesService {
@@ -13,17 +14,13 @@ export class ClothesService {
         const tempFloor = dto.tempFloor ? dto.tempFloor : this.inferring.tempInterring(dto.kind).tempFloor;
         const tempRoof = dto.tempRoof ? dto.tempRoof : this.inferring.tempInterring(dto.kind).tempRoof;
 
-        const key = dto.name
-            + "_"
-            + String(dto.kind)
-            + "_"
-            + (dto.label ? dto.label : "")
-            + "_"
-            + (dto.size ? String(dto.size) : "")
-            + "_"
-            + tempFloor
-            + "_"
-            + tempRoof
+        const key = dto.name + "_"
+            + String(dto.kind) + "_"
+            + (dto.label ? dto.label : "") + "_"
+            + (dto.size ? String(dto.size) : "") + "_"
+            + tempFloor + "_"
+            + tempRoof + "_"
+            + dto.purposes.reduce((acc, ele) => acc + "_" + String(ele), "")
 
         console.log("Key: ", key)
 
@@ -35,6 +32,7 @@ export class ClothesService {
                 tempRoof: tempRoof,
                 ...(dto.label && { label: dto.label }),
                 ...(dto.size && { size: dto.size }),
+                purposes: { hasEvery: dto.purposes },
                 userEmail: userEmail
             }
         })
@@ -69,6 +67,7 @@ export class ClothesService {
                 tempRoof: tempRoof,
                 ...(dto.label && { label: dto.label }),
                 ...(dto.size && { size: dto.size }),
+                purposes: dto.purposes,
                 quant: 1,
                 userEmail: userEmail
             }
@@ -81,6 +80,7 @@ export class ClothesService {
             tempRoof: newClothes.tempRoof,
             ...(newClothes.label && { label: newClothes.label }),
             ...(newClothes.size && { size: newClothes.size }),
+            purposes: newClothes.purposes,
             quant: newClothes.quant,
         }
     }
@@ -89,17 +89,13 @@ export class ClothesService {
         const tempFloor = dto.tempFloor ? dto.tempFloor : this.inferring.tempInterring(dto.kind).tempFloor;
         const tempRoof = dto.tempRoof ? dto.tempRoof : this.inferring.tempInterring(dto.kind).tempRoof;
 
-        const key = dto.name
-            + "_"
-            + String(dto.kind)
-            + "_"
-            + (dto.label ? dto.label : "")
-            + "_"
-            + (dto.size ? String(dto.size) : "")
-            + "_"
-            + tempFloor
-            + "_"
-            + tempRoof
+        const key = dto.name + "_"
+            + String(dto.kind) + "_"
+            + (dto.label ? dto.label : "") + "_"
+            + (dto.size ? String(dto.size) : "") + "_"
+            + tempFloor + "_"
+            + tempRoof + "_"
+            + dto.purposes.reduce((acc, ele) => acc + "_" + String(ele), "")
 
         console.log("Key: ", key)
 
@@ -111,6 +107,7 @@ export class ClothesService {
                 tempRoof: tempRoof,
                 ...(dto.label && { label: dto.label }),
                 ...(dto.size && { size: dto.size }),
+                purposes: { hasEvery: dto.purposes },
                 userEmail: userEmail
             }
         })
@@ -121,34 +118,41 @@ export class ClothesService {
             const matched = await argon.verify(cl.id, key)
 
             if (matched) {
-                await this.prisma.clothes.delete({
-                    where: {
-                        id: cl.id
-                    }
-                })
+                if (cl.quant > 1) {
+                    await this.prisma.clothes.update({
+                        where: {
+                            id: cl.id
+                        },
+                        data: {
+                            quant: cl.quant - 1
+                        }
+                    })
+                } else {
+                    await this.prisma.clothes.delete({
+                        where: {
+                            id: cl.id
+                        }
+                    })
+                }
 
                 return cl;
             }
         }
 
-        return null;
+        throw new NotFoundException(Errors.CLOTHES_NOT_FOUND);
     }
 
     async getClothes(dto: GetClothesDto, userEmail: string) {
         const tempFloor = dto.tempFloor ? dto.tempFloor : this.inferring.tempInterring(dto.kind).tempFloor;
         const tempRoof = dto.tempRoof ? dto.tempRoof : this.inferring.tempInterring(dto.kind).tempRoof;
 
-        const key = dto.name
-            + "_"
-            + String(dto.kind)
-            + "_"
-            + (dto.label ? dto.label : "")
-            + "_"
-            + (dto.size ? String(dto.size) : "")
-            + "_"
-            + tempFloor
-            + "_"
-            + tempRoof
+        const key = dto.name + "_"
+            + String(dto.kind) + "_"
+            + (dto.label ? dto.label : "") + "_"
+            + (dto.size ? String(dto.size) : "") + "_"
+            + tempFloor + "_"
+            + tempRoof + "_"
+            + dto.purposes.reduce((acc, ele) => acc + "_" + String(ele), "")
 
         console.log("Key: ", key)
 
@@ -160,6 +164,7 @@ export class ClothesService {
                 tempRoof: tempRoof,
                 ...(dto.label && { label: dto.label }),
                 ...(dto.size && { size: dto.size }),
+                purposes: { hasEvery: dto.purposes },
                 userEmail: userEmail
             }
         })

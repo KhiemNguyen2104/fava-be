@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { ClothesKind, Size } from "@prisma/client";
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { ClothesKind, Purpose, Size } from "@prisma/client";
+import { IsArray, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class AddClothesDto {
     @IsString()
@@ -12,6 +12,11 @@ export class AddClothesDto {
     @IsNotEmpty()
     @ApiProperty({ required: true, default: ClothesKind.TShirt })
     kind: ClothesKind
+
+    @IsArray()
+    @IsNotEmpty()
+    @ApiProperty({required: true, type: String, default: [Purpose.Work, Purpose.GoOut]})
+    purposes: Purpose[]
 
     @IsNumber()
     @IsOptional()
@@ -45,6 +50,11 @@ export class DeleteClothesDto {
     @ApiProperty({ required: true, default: ClothesKind.TShirt })
     kind: ClothesKind
 
+    @IsArray()
+    @IsNotEmpty()
+    @ApiProperty({required: true, type: String, default: [Purpose.Work, Purpose.GoOut]})
+    purposes: Purpose[]
+
     @IsNumber()
     @IsOptional()
     @ApiProperty({ required: false, default: 22, type: Number })
@@ -76,6 +86,11 @@ export class GetClothesDto {
     @IsNotEmpty()
     @ApiProperty({ required: true, default: ClothesKind.TShirt })
     kind: ClothesKind
+    
+    @IsArray()
+    @IsNotEmpty()
+    @ApiProperty({required: true, type: String, default: [Purpose.Work, Purpose.GoOut]})
+    purposes: Purpose[]
 
     @IsNumber()
     @IsOptional()
