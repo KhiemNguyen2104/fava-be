@@ -54,64 +54,6 @@ export class WeatherService {
     }
 
     async removeLocation(location: string, userEmail: string) {
-        const loc = await this.prisma.weatherLocations.findUnique({
-            where: {
-                cityName: location
-            }
-        })
-
-        const rel = await this.prisma.hasLocation.findUnique({
-            where: {
-                userEmail_cityName: {
-                    userEmail: userEmail,
-                    cityName: location
-                }
-            }
-        })
-
-        if (!loc) throw new NotFoundException(Errors.CITY_NOT_FOUND)
-        if (!rel) throw new NotFoundException(Errors.HAS_LOCATION_NOT_FOUND)
-
-        await this.prisma.hasLocation.delete({
-            where: {
-                userEmail_cityName: {
-                    userEmail: userEmail,
-                    cityName: location
-                }
-            }
-        })
-
-        return location
-    }
-
-    async getLocation(userEmail: string, name: string | undefined) {
-        if (name) {
-            const city = await this.prisma.hasLocation.findUnique({
-                where: {
-                    userEmail_cityName: {
-                        userEmail: userEmail,
-                        cityName: name
-                    }
-                }
-            })
-
-            if (!city) { throw new NotFoundException(Errors.CITY_NOT_FOUND) }
-
-            return city.cityName
-        } else {
-            const rel = await this.prisma.hasLocation.findMany({
-                where: {
-                    userEmail: userEmail
-                }
-            })
-
-            if (rel.length == 0) { throw new NotFoundException(Errors.CITY_NOT_FOUND) }
-
-            return rel.map((r) => r.cityName)
-        }
-    }
-
-    async getCurrentLocation(userEmail: string) {
         const user = await this.prisma.user.findUnique({
             where: {
                 userEmail: userEmail
@@ -120,14 +62,84 @@ export class WeatherService {
 
         if (!user) { throw new NotFoundException(Errors.USER_NOT_FOUND) }
 
-        return user.currentLocation
+        if (location != user.currentLocation) {
+            const loc = await this.prisma.weatherLocations.findUnique({
+                where: {
+                    cityName: location
+                }
+            })
+
+            const rel = await this.prisma.hasLocation.findUnique({
+                where: {
+                    userEmail_cityName: {
+                        userEmail: userEmail,
+                        cityName: location
+                    }
+                }
+            })
+
+            if (!loc) throw new NotFoundException(Errors.CITY_NOT_FOUND)
+            if (!rel) throw new NotFoundException(Errors.HAS_LOCATION_NOT_FOUND)
+
+            await this.prisma.hasLocation.delete({
+                where: {
+                    userEmail_cityName: {
+                        userEmail: userEmail,
+                        cityName: location
+                    }
+                }
+            })
+
+            return location
+        } else {
+            throw new ForbiddenException("You cannot delete the current location.")
+        }
     }
 
-    async getClimateData(name: string, userEmail: string): Promise<ForecastDto> {
-        // const name = location.toLowerCase().replaceAll(' ', '')
-        const l = await this.getLocation(userEmail, name)
+    async getLocation(userEmail: string, name: string | undefined) {
+            if (name) {
+                const city = await this.prisma.hasLocation.findUnique({
+                    where: {
+                        userEmail_cityName: {
+                            userEmail: userEmail,
+                            cityName: name
+                        }
+                    }
+                })
 
-        if (!l) throw new ForbiddenException(Errors.CITY_NOT_FOUND)
+                if (!city) { throw new NotFoundException(Errors.CITY_NOT_FOUND) }
+
+                return city.cityName
+            } else {
+                const rel = await this.prisma.hasLocation.findMany({
+                    where: {
+                        userEmail: userEmail
+                    }
+                })
+
+                if (rel.length == 0) { throw new NotFoundException(Errors.CITY_NOT_FOUND) }
+
+                return rel.map((r) => r.cityName)
+            }
+        }
+
+    async getCurrentLocation(userEmail: string) {
+            const user = await this.prisma.user.findUnique({
+                where: {
+                    userEmail: userEmail
+                }
+            })
+
+            if (!user) { throw new NotFoundException(Errors.USER_NOT_FOUND) }
+
+            return user.currentLocation
+        }
+
+    async getClimateData(name: string, userEmail: string): Promise < ForecastDto > {
+            // const name = location.toLowerCase().replaceAll(' ', '')
+            const l = await this.getLocation(userEmail, name)
+
+        if(!l) throw new ForbiddenException(Errors.CITY_NOT_FOUND)
 
         const url = this.WEATHER_BASE_URL + `&q=${name}`
 
@@ -138,23 +150,23 @@ export class WeatherService {
         // console.log("Reponse: ", response.data)
 
         return response.data
+        }
+
+        // async getClimateData(name: string, time: Date) {
+        //     // const name = location.toLowerCase().replaceAll(' ', '')
+        //     const hour = new Date(time).getHours()
+        //     const url = this.WEATHER_BASE_URL + `&q=${name}&hour=${hour}`
+
+        //     console.log(`Location: ${name}`)
+        //     console.log(`Hour: ${hour}`)
+
+        //     // const response = await axios.get(url)
+
+        //     // console.log("Reponse: ", response.data)
+
+        //     // return response.data
+
+        //     return 1
+        // }
+
     }
-
-    // async getClimateData(name: string, time: Date) {
-    //     // const name = location.toLowerCase().replaceAll(' ', '')
-    //     const hour = new Date(time).getHours()
-    //     const url = this.WEATHER_BASE_URL + `&q=${name}&hour=${hour}`
-
-    //     console.log(`Location: ${name}`)
-    //     console.log(`Hour: ${hour}`)
-
-    //     // const response = await axios.get(url)
-
-    //     // console.log("Reponse: ", response.data)
-
-    //     // return response.data
-
-    //     return 1
-    // }
-
-}

@@ -8,6 +8,7 @@ import { AmadeusModule } from 'src/amadeus/amadeus.module';
 @Module({
   providers: [WeatherService],
   controllers: [WeatherController],
-  imports: [PrismaModule, AmadeusModule]
+  imports: [PrismaModule, AmadeusModule],
+  exports: [WeatherService]
 })
 export class WeatherModule {}
