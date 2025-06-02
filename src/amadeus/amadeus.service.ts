@@ -35,8 +35,6 @@ export class AmadeusService {
   async searchCity(keyword: string): Promise<string> {
     await this.authenticate();
 
-    console.log("Token: ", this.token);
-
     try {
       const response = await axios.get(`${this.baseURL}/reference-data/locations/cities`, {
         headers: { Authorization: `Bearer ${this.token}` },
@@ -48,7 +46,7 @@ export class AmadeusService {
 
       return response.data.data[0].name;
     } catch (error) {
-      throw new HttpException('Failed to fetch city data', HttpStatus.BAD_REQUEST);
+      throw new HttpException('Failed to fetch city data', error.message)
     }
   }
 }

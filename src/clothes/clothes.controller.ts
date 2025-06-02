@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, ForbiddenException, Get, NotFoundException, Post, Query, Req, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, ForbiddenException, Get, NotFoundException, Post, Query, Req, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ClothesService } from './clothes.service';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiQuery } from '@nestjs/swagger';
@@ -29,14 +29,12 @@ export class ClothesController {
 
     @Post()
     @ApiOperation({ summary: "API for creating a new clothes's image" })
-    @ApiConsumes('multipart/form-data')
     @ApiBody({
         schema: {
             type: 'object',
             properties: {
                 image: {
                     type: 'string',
-                    format: 'binary',
                     required: ['false']
                 },
                 prof: {
@@ -47,7 +45,7 @@ export class ClothesController {
                         kind: "TShirt",
                         tempFloor: 22,
                         tempRoof: 35,
-                        purposes: ['Work', 'GoOut'],
+                        purposes: ['GoOut', 'Work'],
                         label: "Nike",
                         size: "XL"
                     }),
@@ -56,51 +54,68 @@ export class ClothesController {
             }
         }
     })
-    @UseInterceptors(FileInterceptor('image', {
-        storage: diskStorage({
-            destination: (req, file, callback) => {
-                const user = req.user as JwtPayLoad
-                const path = join(process.cwd(), 'static', 'clothes', 'images', user.sub.split('@')[0])
+    // @UseInterceptors(FileInterceptor('image', {
+    //     storage: diskStorage({
+    //         destination: (req, file, callback) => {
+    //             const user = req.user as JwtPayLoad
+    //             const path = join(process.cwd(), 'static', 'clothes', 'images', user.sub.split('@')[0])
 
-                if (!existsSync(path)) {
-                    fs.mkdirSync(path, { recursive: true });
-                }
+    //             if (!existsSync(path)) {
+    //                 fs.mkdirSync(path, { recursive: true });
+    //             }
 
-                callback(null, path);
-            },
-            filename: (req, file, callback) => {
-                const name = `${Date.now()}-${file.originalname}`;
-                callback(null, name);
-            }
-        })
-    }))
+    //             callback(null, path);
+    //         },
+    //         filename: (req, file, callback) => {
+    //             const name = `${Date.now()}-${file.originalname}`;
+    //             callback(null, name);
+    //         }
+    //     })
+    // }))
     async addClothesProf(
-        @UploadedFile() file: Express.Multer.File,
-        @Req() req,
+        // @UploadedFile() file: Express.Multer.File,
+        @Body('image') image: string,
+        @Body('prof') profile: string,
         @GetUser() user: JwtPayLoad
     ) {
-        console.log("Profile: ", req.body.prof)
+        console.log("Profile: ", profile)
+        console.log("Image: ", image)
 
-        if (req.body.prof) {
-            const prof = JSON.parse(req.body?.prof)
+        if (profile) {
+            const prof = JSON.parse(profile)
+            const imageBase64 = image
 
             const tempFloor = prof.tempFloor ? prof.tempFloor : this.inferring.tempInterring(prof.kind).tempFloor;
             const tempRoof = prof.tempRoof ? prof.tempRoof : this.inferring.tempInterring(prof.kind).tempRoof;
 
-            if (file.path) {
-                const oldPath = file.path
-                const newFileName = prof.name + "_"
-                    + prof.kind + "_"
-                    + (prof.label || "") + "_"
-                    + (prof.size || "") + "_"
-                    + tempFloor + "_"
-                    + tempRoof + "_"
-                    + prof.purposes.join('_')
-                    + extname(file.originalname);
-                const newPath = join(dirname(file.path), newFileName);
-
-                await fs.promises.rename(oldPath, newPath)
+            const matches = imageBase64.match(/^data:(.+);base64,(.+)$/);
+            if (!matches || matches.length !== 3) {
+                throw new BadRequestException('Invalid base64 image format.');
             }
+
+            const mimeType = matches[1];
+            const base64Data = matches[2];
+            const extension = mimeType.split('/')[1];
+            const buffer = Buffer.from(base64Data, 'base64');
+
+            const imageName = prof.name + "_"
+                + prof.kind + "_"
+                + (prof.label || "") + "_"
+                + (prof.size || "") + "_"
+                + tempFloor + "_"
+                + tempRoof + "_"
+                + prof.purposes.join('_')
+                + `.png`;
+
+            const savePath = join(process.cwd(), 'static', 'clothes', 'images', user.sub.split('@')[0]);
+
+            if (!existsSync(savePath)) {
+                fs.mkdirSync(savePath, { recursive: true });
+            }
+
+            const fullImagePath = join(savePath, imageName);
+            console.log("Path: ", fullImagePath)
+            await fs.promises.writeFile(fullImagePath, buffer);
 
             return await this.clothesService.addClothes(prof, user.sub);
         } else {
@@ -146,7 +161,7 @@ export class ClothesController {
     @ApiQuery({ name: 'kind', required: true, default: ClothesKind.TShirt })
     @ApiQuery({ type: Number, name: 'tempFloor', required: true, default: 22 })
     @ApiQuery({ type: Number, name: 'tempRoof', required: true, default: 35 })
-    @ApiQuery({ type: String, name: 'purposes', required: true, default: [Purpose.Work, Purpose.GoOut] })
+    @ApiQuery({ type: String, name: 'purposes', required: true, default: [Purpose.GoOut, Purpose.Work] })
     @ApiQuery({ type: String, name: 'label', required: false, default: 'Nike' })
     @ApiQuery({ name: 'size', required: false, default: Size.XL })
     async getClothesProfile(
@@ -181,7 +196,7 @@ export class ClothesController {
     @ApiQuery({ name: 'kind', required: true, default: ClothesKind.TShirt })
     @ApiQuery({ type: Number, name: 'tempFloor', required: true, default: 22 })
     @ApiQuery({ type: Number, name: 'tempRoof', required: true, default: 35 })
-    @ApiQuery({ type: String, name: 'purposes', required: true, default: [Purpose.Work, Purpose.GoOut] })
+    @ApiQuery({ type: String, name: 'purposes', required: true, default: [Purpose.GoOut, Purpose.Work] })
     @ApiQuery({ type: String, name: 'label', required: false, default: 'Nike' })
     @ApiQuery({ name: 'size', required: false, default: Size.XL })
     async getClothesImage(
@@ -221,7 +236,7 @@ export class ClothesController {
 
         if (!existsSync(imagePath)) { throw new NotFoundException(Errors.CLOTHES_IMAGE_NOT_FOUND) }
 
-        const stream = createReadStream(imagePath)
+        const stream = createReadStream(imagePath);
         res.set({ 'Content-Type': 'image/png' });
 
         return stream.pipe(res)
