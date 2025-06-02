@@ -23,6 +23,7 @@ export class UserService {
                 userEmail: user.userEmail,
                 currentLocation: user.currentLocation,
                 suggestions: user.suggestions,
+                clothes: user.clothes,
                 usefulSuggestions: user.usefulSuggestions
             }
         } else {
