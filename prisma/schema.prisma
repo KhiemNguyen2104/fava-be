@@ -53,7 +53,7 @@ model User {
 }
 
 model Clothes {
-  id        String      @id
+  id        String
   name      String
   kind      ClothesKind
   tempFloor Float
@@ -66,6 +66,8 @@ model Clothes {
 
   userEmail String
   user      User   @relation(references: [userEmail], fields: [userEmail])
+
+  @@id([id, userEmail])
 }
 
 model HasLocation {

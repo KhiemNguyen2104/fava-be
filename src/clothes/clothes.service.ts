@@ -45,7 +45,10 @@ export class ClothesService {
             if (matched) {
                 await this.prisma.clothes.update({
                     where: {
-                        id: cl.id
+                        id_userEmail: {
+                            id: cl.id,
+                            userEmail: userEmail
+                        }
                     },
                     data: {
                         quant: cl.quant + 1
@@ -121,7 +124,10 @@ export class ClothesService {
                 if (cl.quant > 1) {
                     await this.prisma.clothes.update({
                         where: {
-                            id: cl.id
+                            id_userEmail: {
+                                id: cl.id,
+                                userEmail: userEmail
+                            }
                         },
                         data: {
                             quant: cl.quant - 1
@@ -130,7 +136,10 @@ export class ClothesService {
                 } else {
                     await this.prisma.clothes.delete({
                         where: {
-                            id: cl.id
+                            id_userEmail: {
+                                id: cl.id,
+                                userEmail: userEmail
+                            }
                         }
                     })
                 }

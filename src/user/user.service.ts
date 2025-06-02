@@ -12,7 +12,8 @@ export class UserService {
             const user = await this.prisma.user.findUnique({
                 where: {
                     userEmail: userEmail
-                }
+                },
+                include: { clothes: true },
             })
 
             if (!user) { throw new NotFoundException(Errors.USER_NOT_FOUND) }
@@ -25,12 +26,13 @@ export class UserService {
                 usefulSuggestions: user.usefulSuggestions
             }
         } else {
-            return (await this.prisma.user.findMany()).map((user) => {
+            return (await this.prisma.user.findMany({ include: { clothes: true }, })).map((user) => {
                 return {
                     userName: user.userName,
                     userEmail: user.userEmail,
                     currentLocation: user.currentLocation,
                     suggestions: user.suggestions,
+                    clothes: user.clothes,
                     usefulSuggestions: user.usefulSuggestions
                 };
             })
@@ -41,7 +43,8 @@ export class UserService {
         const user = await this.prisma.user.findUnique({
             where: {
                 userEmail: dto.userEmail
-            }
+            },
+            include: { clothes: true },
         })
 
         if (!user) { throw new NotFoundException(Errors.USER_NOT_FOUND) }
